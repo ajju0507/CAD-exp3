@@ -1,0 +1,123 @@
+Experiment 3 -
+
+Step 1: Create a new bucket:
+
+Click "Create bucket".
+Bucket name: Enter a unique name (e.g., my-flask-app-bucket).
+AWS Region: Select your region (e.g., eu-west-1).
+Leave other settings as default and click Create bucket.
+Set permissions (Optional for Public Access):
+
+If you want to allow public access, go to Bucket Permissions and modify the settings accordingly.
+
+Step 2: create IAM USer with sefullaccess permission
+IAM Users 
+new user > s3fullaccess permission
+
+Once created > open the created user Security Credentials > Create access keys
+
+select cli
+copy access key and secret access key
+
+Step 3: Configure AWS Credentials
+Option 1: Configure AWS CLI windows cmd
+
+aws configure
+remove any if existed - del %USERPROFILE%\.aws\config
+del %USERPROFILE%\.aws\credentials
+
+aws configure
+enter access key, secret access key and region
+
+Option 2 - from aws cli console
+remove any if existed-  rm -rf ~/.aws
+
+aws configure
+enter access key, secret access key and region
+
+
+Step 4: Install Boto3
+pip install boto3
+
+aws configure
+
+
+Step 5: create a new directory 
+C:\Windows\System32>mkdir awsexp3
+
+
+create a file for credentials
+C:\Windows\System32\awsexp3>echo >credentials
+ > enter access key, secret access key and region
+
+create a file 
+C:\Windows\System32\awsexp3>echo >test_file.txt
+notepad test_file.txt - enter 
+This is a sample file to test AWS S3 upload.
+Timestamp: 2025-03-18 12:30 PM
+ 
+5.1 - create a file for upload_s3.py 
+C:\Windows\System32\awsexp3>echo upload_s3.py
+Notepad upload_s3.py
+> enter code 
+
+import boto3
+import os
+
+# Load AWS credentials from environment variables
+AWS_REGION = os.getenv("AWS_REGION", "us-west-1")
+s3 = boto3.client("s3")
+
+# Define bucket and file details
+bucket_name = "exp3implementingcloudstorage"  # Change to your bucket name
+file_path = "test_file.txt"  # File on local machine
+object_name = "uploaded_test_file.txt"  # Name in S3
+
+try:
+    s3.upload_file(file_path, bucket_name, object_name)
+    print(f"✅ File '{file_path}' uploaded to S3 bucket '{bucket_name}' as '{object_name}'")
+except Exception as e:
+    print(f"❌ Error uploading file: {e}")
+
+Now upload the file 
+C:\Windows\System32\awsexp3>python upload_s3.py
+
+
+Output - C:\Windows\System32\awsexp3>python upload_s3.py
+✅ File 'test_file.txt' uploaded to S3 bucket 'exp3implementingcloudstorage' as 'uploaded_test_file.txt'
+
+
+5.2 - create a file for download_s3.py
+C:\Windows\System32\awsexp3>echo >download_s3.py
+notepad download_s3.py
+
+enter code -
+import boto3
+import os
+
+# Load AWS credentials from environment variables
+AWS_REGION = os.getenv("AWS_REGION", "us-west-1")
+
+# Create the S3 client
+s3 = boto3.client("s3")
+
+# Define the bucket name
+bucket_name = "exp3implementingcloudstorage"  # Change to your bucket name
+
+try:
+    response = s3.list_objects_v2(Bucket=bucket_name)
+    if "Contents" in response:
+        for obj in response["Contents"]:
+            print(f"📂 Object: {obj['Key']}")
+    else:
+        print("🛑 Bucket is empty")
+except Exception as e:
+    print(f"❌ Error listing objects: {e}")
+
+Output - C:\Windows\System32\awsexp3>python download_s3.py
+📂 Object: uploaded_test_file.txt
+
+
+Step 6: verify 
+
+aws s3 console > buckets > created bucket > objects tab > uploaded file
